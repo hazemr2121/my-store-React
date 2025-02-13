@@ -53,7 +53,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* UserName */}
             <div className="mb-3">
               <label htmlFor="userName" className="form-label">
                 Username
@@ -73,7 +72,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* Phone Number */}
             <div className="mb-3">
               <label htmlFor="phone" className="form-label">
                 Phone Number
@@ -95,7 +93,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* Gender */}
             <div className="mb-3">
               <label htmlFor="gender" className="form-label">
                 Gender
@@ -114,7 +111,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* Password */}
             <div className="mb-3">
               <label htmlFor="password" className="form-label">
                 Password
@@ -140,7 +136,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div className="mb-3">
               <label htmlFor="confirmedPassword" className="form-label">
                 Confirm Password

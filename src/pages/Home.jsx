@@ -1,37 +1,89 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { getProducts } from "../services/api";
+import ProductItem from "./ProductItem";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const data = await getProducts();
-      setProducts(data);
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProducts();
   }, []);
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  if (loading) {
+    return <div className="text-center mt-5">Loading...</div>;
+  }
+
   return (
     <div className="container">
+      <h1 className="text-center my-4">Products</h1>
+
       <div className="row">
-        {products.map((product) => (
-          <div key={product.id} className="col-md-4 mb-4">
-            <div className="card h-100">
-              <img
-                src={product.image}
-                className="card-img-top"
-                alt={product.title}
-                style={{ height: "200px", objectFit: "contain" }}
-              />
-              <div className="card-body">
-                <h5 className="card-title">{product.title}</h5>
-                <p className="card-text">${product.price}</p>
-              </div>
-            </div>
-          </div>
+        {currentProducts.map((product) => (
+          <ProductItem product={product} key={product.id} />
         ))}
       </div>
+
+      <nav className="d-flex justify-content-center mt-4">
+        <ul className="pagination">
+          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+            <button
+              className="page-link"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+          </li>
+
+          {Array.from({ length: totalPages }, (_, index) => (
+            <li
+              key={index + 1}
+              className={`page-item ${
+                currentPage === index + 1 ? "active" : ""
+              }`}
+            >
+              <button className="page-link" onClick={() => paginate(index + 1)}>
+                {index + 1}
+              </button>
+            </li>
+          ))}
+
+          <li
+            className={`page-item ${
+              currentPage === totalPages ? "disabled" : ""
+            }`}
+          >
+            <button
+              className="page-link"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/api";
+import { login as loginApi } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 import { useState } from "react";
 
 export default function Login() {
@@ -10,15 +12,20 @@ export default function Login() {
     formState: { errors },
   } = useForm();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
     setError("");
+    setLoading(true);
+
     try {
-      const response = await login(data.email, data.password);
+      const response = await loginApi(data.email, data.password);
 
       if (response.message === "Login successful") {
-        console.log("Login successful:", response);
+        login(response.token);
+        toast.success("Login successful!");
         navigate("/");
       } else {
         setError("Invalid email or password");
@@ -26,6 +33,8 @@ export default function Login() {
     } catch (err) {
       setError("Login failed. Please try again.");
       console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,8 +77,12 @@ export default function Login() {
                 </div>
               )}
             </div>
-            <button type="submit" className="btn btn-primary w-100">
-              Login
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>

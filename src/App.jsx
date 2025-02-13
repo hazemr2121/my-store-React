@@ -3,15 +3,30 @@ import {
   RouterProvider,
   Outlet,
   Link,
+  useNavigate,
 } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Categories from "./pages/Categories";
+import ProductDetails from "./pages/ProductDetails";
+import { useCart } from "./context/CartContext";
+import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const Layout = () => {
+  const { token, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const { cartCount } = useCart();
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="container-fluid p-0">
+      {/* Bootstrap Navbar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container">
           <Link className="navbar-brand" to="/">
@@ -35,19 +50,41 @@ const Layout = () => {
                   Home
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/login">
-                  Login
-                </Link>
-              </li>
+              {token ? (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-link nav-link"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </li>
+              ) : (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">
+                    Login
+                  </Link>
+                </li>
+              )}
+
               <li className="nav-item">
                 <Link className="nav-link" to="/register">
                   Register
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/categories">
+              <li className="nav-item dropdown">
+                <Link
+                  to="/categories"
+                  className="nav-link"
+                  role="button"
+                  aria-expanded="false"
+                >
                   Categories
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/cart">
+                  Cart ({cartCount})
                 </Link>
               </li>
             </ul>
@@ -67,10 +104,31 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { index: true, element: <Home /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
-      { path: "categories", element: <Categories /> },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            path: "categories",
+            element: <Categories />,
+          },
+          {
+            path: "products/:id",
+            element: <ProductDetails />,
+          },
+        ],
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
     ],
   },
 ]);

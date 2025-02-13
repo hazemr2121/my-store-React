@@ -28,3 +28,13 @@ export const registerForm = async (userData) => {
   });
   return response.json();
 };
+export const getProductsByCategory = async (category) => {
+  const response = await fetch(
+    `${FAKE_STORE_API}/products/category/${category}`
+  );
+  return response.json();
+};
+export const getProductById = async (id) => {
+  const response = await fetch(`${FAKE_STORE_API}/products/${id}`);
+  return response.json();
+};
