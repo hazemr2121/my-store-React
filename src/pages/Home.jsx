@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { getProducts } from "../services/api";
 import ProductItem from "./ProductItem";
+import useScreenSize from "../hooks/useScreenSize";
 
 export default function Home() {
+  const { width, height } = useScreenSize();
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -84,6 +86,12 @@ export default function Home() {
           </li>
         </ul>
       </nav>
+      <div className="responsive-container">
+        <h2>Screen Information</h2>
+        <p>
+          Current dimensions: {width} x {height}
+        </p>
+      </div>
     </div>
   );
 }

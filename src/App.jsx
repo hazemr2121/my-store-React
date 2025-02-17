@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -5,14 +6,27 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Categories from "./pages/Categories";
-import ProductDetails from "./pages/ProductDetails";
 import { useCart } from "./context/CartContext";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Categories = lazy(() => import("./pages/Categories"));
+const ProductDetails = lazy(() => import("./pages/ProductDetails"));
+const Cart = lazy(() => import("./pages/Cart"));
+
+const LoadingFallback = () => (
+  <div
+    className="d-flex justify-content-center align-items-center"
+    style={{ height: "60vh" }}
+  >
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  </div>
+);
 
 const Layout = () => {
   const { token, logout } = useAuth();
@@ -26,7 +40,6 @@ const Layout = () => {
 
   return (
     <div className="container-fluid p-0">
-      {/* Bootstrap Navbar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container">
           <Link className="navbar-brand" to="/">
@@ -93,7 +106,9 @@ const Layout = () => {
       </nav>
 
       <div className="container mt-4">
-        <Outlet />
+        <Suspense fallback={<LoadingFallback />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   );
@@ -102,32 +117,68 @@ const Layout = () => {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <Suspense>
+        <Layout />
+      </Suspense>
+    ),
     children: [
       {
-        element: <ProtectedRoute />,
+        element: (
+          <Suspense>
+            <ProtectedRoute />
+          </Suspense>
+        ),
         children: [
           {
             index: true,
-            element: <Home />,
+            element: (
+              <Suspense>
+                <Home />
+              </Suspense>
+            ),
           },
           {
             path: "categories",
-            element: <Categories />,
+            element: (
+              <Suspense>
+                <Categories />
+              </Suspense>
+            ),
           },
           {
             path: "products/:id",
-            element: <ProductDetails />,
+            element: (
+              <Suspense>
+                <ProductDetails />
+              </Suspense>
+            ),
+          },
+          {
+            path: "cart",
+            element: (
+              <Suspense>
+                <Cart />
+              </Suspense>
+            ),
           },
         ],
       },
       {
         path: "login",
-        element: <Login />,
+        element: (
+          <Suspense>
+            <Login />
+          </Suspense>
+        ),
       },
       {
         path: "register",
-        element: <Register />,
+        element: (
+          <Suspense>
+            <Register />
+          </Suspense>
+        ),
       },
     ],
   },
