@@ -1,30 +1,38 @@
+/* eslint-disable react/prop-types */
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "../context/CartContext";
-
-// eslint-disable-next-line react/prop-types
+import { useMutation } from "@tanstack/react-query";
 
 function ProductItem({ product }) {
   const { addToCart } = useCart();
-  const handleAddToCart = async () => {
-    try {
-      await axios.post("https://fakestoreapi.com/carts", {
-        userId: 5,
-        date: new Date().toISOString().split("T")[0],
-        products: [{ productId: product.id, quantity: 1 }],
-      });
 
+  const mutation = useMutation({
+    mutationFn: (newCartData) => {
+      return axios.post("https://fakestoreapi.com/carts", newCartData);
+    },
+    onSuccess: () => {
       addToCart(product.id, 1);
-
       toast.success(`${product.title} added to cart!`);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error adding to cart:", error);
       toast.error("Failed to add to cart");
-    }
+    },
+  });
+
+  const handleAddToCart = () => {
+    const newCartData = {
+      userId: 5,
+      date: new Date().toISOString().split("T")[0],
+      products: [{ productId: product.id, quantity: 1 }],
+    };
+    mutation.mutate(newCartData);
   };
+
   return (
-    <div key={product.id} className="col-md-4 mb-4">
+    <div className="col-md-4 mb-4" key={product.id}>
       <div className="card h-100">
         <Link to={`/products/${product.id}`}>
           <img
@@ -37,10 +45,13 @@ function ProductItem({ product }) {
 
         <div className="card-body">
           <h5 className="card-title">{product.title}</h5>
-
           <p className="card-text">${product.price}</p>
-          <button className="btn btn-info w-100" onClick={handleAddToCart}>
-            Add to cart
+          <button
+            className="btn btn-info w-100"
+            onClick={handleAddToCart}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Adding..." : "Add to cart"}
           </button>
         </div>
       </div>

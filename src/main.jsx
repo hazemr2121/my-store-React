@@ -8,16 +8,21 @@ import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/AuthContext";
 import { Provider } from "react-redux";
 import { store } from "./store.js";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+
+let queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <AuthProvider>
-        <CartProvider>
-          <App />
-          <ToastContainer />
-        </CartProvider>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CartProvider>
+            <App />
+            <ToastContainer />
+          </CartProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </Provider>
   </StrictMode>
 );
